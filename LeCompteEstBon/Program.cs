@@ -1,7 +1,6 @@
 ﻿class Program
 {
     private static readonly List<int> tiles = [];
-    private static int number;
     private static bool found = false;
     private static int bestResult = 0;
     private static readonly IDictionary<Operation, Func<int, int, int>> DoOperations = new Dictionary<Operation, Func<int, int, int>>()
@@ -35,14 +34,12 @@
         }
         else
         {
-            number = int.Parse(args.Last());
             args.ToList().Take(args.Length - 1).ToList().ForEach(x => tiles.Add(int.Parse(x)));
-            Find(tiles, number);
-            if (!found) Console.WriteLine($"Le nombre le plus proche est {bestResult}");
+            if (!Find(tiles, int.Parse(args.Last()))) Console.WriteLine($"Le nombre le plus proche est {bestResult}");
         }
 
         #region Local methods
-        static void Find(List<int> tiles, int number)
+        static bool Find(List<int> tiles, int number)
         {
             int newTile;
             for (int i = 0; i < tiles.Count; i++)
@@ -53,22 +50,20 @@
                     {
                         if (found) break;
                         if ((newTile = DoOperations[operation](tiles[i], tiles[j])) == number) found = true;
-                        else
+                        else if (newTile != 0)
                         {
-                            if (newTile != 0)
-                            {
-                                if (Math.Abs(newTile - number) < Math.Abs(bestResult - number)) bestResult = newTile;
-                                if (tiles.Count > 2) ContinueWithNewTile(i, j);
-                            }
+                            if (Math.Abs(newTile - number) < Math.Abs(bestResult - number)) bestResult = newTile;
+                            if (tiles.Count > 2) ContinueWithNewTile(i, j);
                         }
                         if (found)
                         {
                             DisplayOperations[operation](tiles[i], tiles[j]);
-                            return;
+                            return true;
                         }
                     }
                 }
             }
+            return false;
 
             #region Local methods
             void ContinueWithNewTile(int i, int j)
@@ -79,9 +74,8 @@
                     if (x != i && x != j) newTiles.Add(tiles[x]);
                 }
                 newTiles.Add(newTile);
-                Find(newTiles, number);
+                _ = Find(newTiles, number);
             }
-
             #endregion
         }
         #endregion
